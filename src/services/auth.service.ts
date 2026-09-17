@@ -1,14 +1,17 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/user.repository.js';
+import { SmsService } from './sms.service.js';
 import { RegisterDTO, LoginDTO, SendOtpDTO, VerifyOtpDTO, AuthResponse } from '../types/user.js';
 
 export class AuthService {
   private jwtSecret: string;
+  private smsService: SmsService;
   private otpStore: Map<string, string> = new Map();
 
   constructor(private userRepository: UserRepository) {
     this.jwtSecret = process.env.JWT_SECRET || 'fallback-super-secret-jwt-key';
+    this.smsService = new SmsService();
   }
 
   public async register(dto: RegisterDTO): Promise<AuthResponse> {
@@ -86,27 +89,38 @@ export class AuthService {
     };
   }
 
-  public async sendOtp(dto: SendOtpDTO): Promise<{ success: boolean; message: string; otp: string }> {
+  public async sendOtp(dto: SendOtpDTO): Promise<{ success: boolean; message: string; otp?: string }> {
     const normalizedMobile = dto.mobileNumber.trim().replace(/^\+91/, '');
-    const defaultOtp = '123456';
-    this.otpStore.set(normalizedMobile, defaultOtp);
+    
+    // Generate dynamic random 6-digit OTP code
+    const generatedOtp = this.smsService.generateOtp();
+    this.otpStore.set(normalizedMobile, generatedOtp);
+
+    // Send Real SMS if SMS API key is configured
+    await this.smsService.sendSms(normalizedMobile, generatedOtp);
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    const hasSmsKey = !!(process.env.FAST2SMS_API_KEY || process.env.SMS_API_KEY);
 
     return {
       success: true,
       message: `OTP sent successfully to ${dto.mobileNumber}`,
-      otp: defaultOtp,
+      ...(!hasSmsKey && { otp: generatedOtp }),
     };
   }
 
   public async verifyOtp(dto: VerifyOtpDTO): Promise<AuthResponse> {
     const normalizedMobile = dto.mobileNumber.trim().replace(/^\+91/, '');
-    const validOtp = this.otpStore.get(normalizedMobile) || '123456';
+    const validOtp = this.otpStore.get(normalizedMobile);
 
-    if (dto.otp.trim() !== validOtp) {
+    if (!validOtp || dto.otp.trim() !== validOtp) {
       const error = new Error('Invalid or expired OTP');
       (error as any).statusCode = 400;
       throw error;
     }
+
+    // Clear used OTP
+    this.otpStore.delete(normalizedMobile);
 
     let user = this.userRepository.findByMobileNumber(normalizedMobile);
     if (!user) {
