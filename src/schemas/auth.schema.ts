@@ -3,12 +3,17 @@ import { userCoreSchema } from './user.schema.js';
 export const registerSchema = {
   body: {
     type: 'object',
-    required: ['name', 'email', 'password'],
+    required: ['name'],
     properties: {
       name: { type: 'string', minLength: 2, maxLength: 100 },
-      email: { type: 'string', format: 'email' },
-      password: { type: 'string', minLength: 6, maxLength: 100 },
-      role: { type: 'string', enum: ['admin', 'user'], default: 'user' },
+      mobileNumber: { type: 'string' },
+      village: { type: 'string' },
+      district: { type: 'string' },
+      state: { type: 'string' },
+      email: { type: 'string' },
+      password: { type: 'string' },
+      profileImage: { type: 'string' },
+      role: { type: 'string', enum: ['admin', 'user', 'farmer'], default: 'farmer' },
     },
     additionalProperties: false,
   },
@@ -28,10 +33,10 @@ export const registerSchema = {
 export const loginSchema = {
   body: {
     type: 'object',
-    required: ['email', 'password'],
     properties: {
-      email: { type: 'string', format: 'email' },
-      password: { type: 'string', minLength: 6, maxLength: 100 },
+      mobileNumber: { type: 'string' },
+      email: { type: 'string' },
+      password: { type: 'string' },
     },
     additionalProperties: false,
   },

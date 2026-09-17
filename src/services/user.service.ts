@@ -19,11 +19,22 @@ export class UserService {
   }
 
   public createUser(dto: CreateUserDTO): UserWithoutPassword {
-    const existing = this.userRepository.findByEmail(dto.email);
-    if (existing) {
-      const error = new Error(`User with email '${dto.email}' already exists`);
-      (error as any).statusCode = 409;
-      throw error;
+    if (dto.mobileNumber) {
+      const existingMobile = this.userRepository.findByMobileNumber(dto.mobileNumber);
+      if (existingMobile) {
+        const error = new Error(`User with mobile number '${dto.mobileNumber}' already exists`);
+        (error as any).statusCode = 409;
+        throw error;
+      }
+    }
+
+    if (dto.email) {
+      const existingEmail = this.userRepository.findByEmail(dto.email);
+      if (existingEmail) {
+        const error = new Error(`User with email '${dto.email}' already exists`);
+        (error as any).statusCode = 409;
+        throw error;
+      }
     }
 
     const created = this.userRepository.create(dto);
@@ -35,7 +46,7 @@ export class UserService {
     const existingUser = this.getUserById(id);
 
     // If changing email, check for duplicate email
-    if (dto.email && dto.email.toLowerCase().trim() !== existingUser.email.toLowerCase()) {
+    if (dto.email && existingUser.email && dto.email.toLowerCase().trim() !== existingUser.email.toLowerCase()) {
       const emailTaken = this.userRepository.findByEmail(dto.email);
       if (emailTaken) {
         const error = new Error(`Email '${dto.email}' is already in use by another user`);

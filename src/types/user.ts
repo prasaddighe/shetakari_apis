@@ -1,10 +1,15 @@
-export type UserRole = 'admin' | 'user';
+export type UserRole = 'admin' | 'user' | 'farmer';
 
 export interface User {
   id: string;
   name: string;
-  email: string;
+  mobileNumber?: string;
+  village?: string;
+  district?: string;
+  state?: string;
+  email?: string;
   password?: string;
+  profileImage?: string;
   role: UserRole;
   createdAt: string;
   updatedAt: string;
@@ -14,15 +19,25 @@ export type UserWithoutPassword = Omit<User, 'password'>;
 
 export interface CreateUserDTO {
   name: string;
-  email: string;
+  mobileNumber?: string;
+  village?: string;
+  district?: string;
+  state?: string;
+  email?: string;
   password?: string;
+  profileImage?: string;
   role?: UserRole;
 }
 
 export interface UpdateUserDTO {
   name?: string;
+  mobileNumber?: string;
+  village?: string;
+  district?: string;
+  state?: string;
   email?: string;
   password?: string;
+  profileImage?: string;
   role?: UserRole;
 }
 
@@ -32,14 +47,20 @@ export interface UserParams {
 
 export interface RegisterDTO {
   name: string;
-  email: string;
-  password: string;
+  mobileNumber?: string;
+  village?: string;
+  district?: string;
+  state?: string;
+  email?: string;
+  password?: string;
+  profileImage?: string;
   role?: UserRole;
 }
 
 export interface LoginDTO {
-  email: string;
-  password: string;
+  mobileNumber?: string;
+  email?: string;
+  password?: string;
 }
 
 export interface AuthResponse {
