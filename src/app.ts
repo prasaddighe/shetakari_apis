@@ -13,9 +13,30 @@ export function buildApp() {
     origin: true,
   });
 
-  // Health Check Endpoint
+  // Root & Health Check Endpoints
+  app.get('/', async () => {
+    return {
+      status: 'OK',
+      message: 'Fastify User CRUD API is running cleanly',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    };
+  });
+
   app.get('/health', async () => {
-    return { status: 'OK', timestamp: new Date().toISOString() };
+    return {
+      status: 'OK',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    };
+  });
+
+  app.get('/api/health', async () => {
+    return {
+      status: 'OK',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    };
   });
 
   // Register User API Routes
