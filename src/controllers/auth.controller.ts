@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { AuthService } from '../services/auth.service.js';
 import { UserService } from '../services/user.service.js';
-import { RegisterDTO, LoginDTO } from '../types/user.js';
+import { RegisterDTO, LoginDTO, SendOtpDTO, VerifyOtpDTO } from '../types/user.js';
 
 export class AuthController {
   constructor(
@@ -22,6 +22,22 @@ export class AuthController {
     reply: FastifyReply
   ) => {
     const result = await this.authService.login(request.body);
+    return reply.status(200).send(result);
+  };
+
+  public sendOtpHandler = async (
+    request: FastifyRequest<{ Body: SendOtpDTO }>,
+    reply: FastifyReply
+  ) => {
+    const result = await this.authService.sendOtp(request.body);
+    return reply.status(200).send(result);
+  };
+
+  public verifyOtpHandler = async (
+    request: FastifyRequest<{ Body: VerifyOtpDTO }>,
+    reply: FastifyReply
+  ) => {
+    const result = await this.authService.verifyOtp(request.body);
     return reply.status(200).send(result);
   };
 

@@ -63,6 +63,15 @@ export interface LoginDTO {
   password?: string;
 }
 
+export interface SendOtpDTO {
+  mobileNumber: string;
+}
+
+export interface VerifyOtpDTO {
+  mobileNumber: string;
+  otp: string;
+}
+
 export interface AuthResponse {
   success: boolean;
   message: string;

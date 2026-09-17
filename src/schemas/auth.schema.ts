@@ -52,3 +52,47 @@ export const loginSchema = {
     },
   },
 } as const;
+
+export const sendOtpSchema = {
+  body: {
+    type: 'object',
+    required: ['mobileNumber'],
+    properties: {
+      mobileNumber: { type: 'string' },
+    },
+    additionalProperties: false,
+  },
+  response: {
+    200: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+        otp: { type: 'string' },
+      },
+    },
+  },
+} as const;
+
+export const verifyOtpSchema = {
+  body: {
+    type: 'object',
+    required: ['mobileNumber', 'otp'],
+    properties: {
+      mobileNumber: { type: 'string' },
+      otp: { type: 'string' },
+    },
+    additionalProperties: false,
+  },
+  response: {
+    200: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+        token: { type: 'string' },
+        user: userCoreSchema,
+      },
+    },
+  },
+} as const;
