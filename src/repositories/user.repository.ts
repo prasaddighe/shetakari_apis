@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { User, CreateUserDTO, UpdateUserDTO } from '../types/user.js';
+import bcrypt from 'bcryptjs';
+import { User, CreateUserDTO, UpdateUserDTO, UserWithoutPassword } from '../types/user.js';
 
 export class UserRepository {
   private users: Map<string, User> = new Map();
@@ -9,10 +10,10 @@ export class UserRepository {
   }
 
   private seedInitialData(): void {
-    const defaultUsers: CreateUserDTO[] = [
-      { name: 'Rahul Sharma', email: 'rahul@example.com', role: 'admin' },
-      { name: 'Priya Patel', email: 'priya@example.com', role: 'user' },
-      { name: 'Amit Kumar', email: 'amit@example.com', role: 'user' },
+    const defaultUsers: (CreateUserDTO & { password?: string })[] = [
+      { name: 'Rahul Sharma', email: 'rahul@example.com', role: 'admin', password: 'Password123' },
+      { name: 'Priya Patel', email: 'priya@example.com', role: 'user', password: 'Password123' },
+      { name: 'Amit Kumar', email: 'amit@example.com', role: 'user', password: 'Password123' },
     ];
 
     for (const userData of defaultUsers) {
@@ -20,8 +21,13 @@ export class UserRepository {
     }
   }
 
-  public findAll(): User[] {
-    return Array.from(this.users.values());
+  public sanitizeUser(user: User): UserWithoutPassword {
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  }
+
+  public findAll(): UserWithoutPassword[] {
+    return Array.from(this.users.values()).map(this.sanitizeUser);
   }
 
   public findById(id: string): User | undefined {
@@ -37,10 +43,14 @@ export class UserRepository {
 
   public create(data: CreateUserDTO): User {
     const now = new Date().toISOString();
+    const rawPassword = data.password || 'DefaultPassword123';
+    const hashedPassword = bcrypt.hashSync(rawPassword, 10);
+
     const newUser: User = {
       id: randomUUID(),
       name: data.name.trim(),
       email: data.email.toLowerCase().trim(),
+      password: hashedPassword,
       role: data.role || 'user',
       createdAt: now,
       updatedAt: now,
@@ -54,11 +64,17 @@ export class UserRepository {
     const existing = this.users.get(id);
     if (!existing) return undefined;
 
+    let hashedPassword = existing.password;
+    if (data.password) {
+      hashedPassword = bcrypt.hashSync(data.password, 10);
+    }
+
     const updatedUser: User = {
       ...existing,
       ...(data.name && { name: data.name.trim() }),
       ...(data.email && { email: data.email.toLowerCase().trim() }),
       ...(data.role && { role: data.role }),
+      password: hashedPassword,
       updatedAt: new Date().toISOString(),
     };
 

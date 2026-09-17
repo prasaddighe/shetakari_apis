@@ -1,6 +1,8 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import fastifyJwt from '@fastify/jwt';
 import { userRoutes } from './routes/user.routes.js';
+import { authRoutes } from './routes/auth.routes.js';
 
 export function buildApp() {
   const app = Fastify({
@@ -13,11 +15,16 @@ export function buildApp() {
     origin: true,
   });
 
+  // Register JWT Plugin
+  app.register(fastifyJwt, {
+    secret: process.env.JWT_SECRET || 'fallback-super-secret-jwt-key',
+  });
+
   // Root & Health Check Endpoints
   app.get('/', async () => {
     return {
       status: 'OK',
-      message: 'Fastify User CRUD API is running cleanly',
+      message: 'Fastify User & Auth API is running cleanly',
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
     };
@@ -39,7 +46,8 @@ export function buildApp() {
     };
   });
 
-  // Register User API Routes
+  // Register API Routes
+  app.register(authRoutes, { prefix: '/api/auth' });
   app.register(userRoutes, { prefix: '/api/users' });
 
   // Custom Error Handler

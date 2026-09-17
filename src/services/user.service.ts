@@ -1,24 +1,24 @@
 import { UserRepository } from '../repositories/user.repository.js';
-import { User, CreateUserDTO, UpdateUserDTO } from '../types/user.js';
+import { UserWithoutPassword, CreateUserDTO, UpdateUserDTO } from '../types/user.js';
 
 export class UserService {
   constructor(private userRepository: UserRepository) {}
 
-  public getAllUsers(): User[] {
+  public getAllUsers(): UserWithoutPassword[] {
     return this.userRepository.findAll();
   }
 
-  public getUserById(id: string): User {
+  public getUserById(id: string): UserWithoutPassword {
     const user = this.userRepository.findById(id);
     if (!user) {
       const error = new Error(`User with ID '${id}' not found`);
       (error as any).statusCode = 404;
       throw error;
     }
-    return user;
+    return this.userRepository.sanitizeUser(user);
   }
 
-  public createUser(dto: CreateUserDTO): User {
+  public createUser(dto: CreateUserDTO): UserWithoutPassword {
     const existing = this.userRepository.findByEmail(dto.email);
     if (existing) {
       const error = new Error(`User with email '${dto.email}' already exists`);
@@ -26,10 +26,11 @@ export class UserService {
       throw error;
     }
 
-    return this.userRepository.create(dto);
+    const created = this.userRepository.create(dto);
+    return this.userRepository.sanitizeUser(created);
   }
 
-  public updateUser(id: string, dto: UpdateUserDTO): User {
+  public updateUser(id: string, dto: UpdateUserDTO): UserWithoutPassword {
     // Check if user exists
     const existingUser = this.getUserById(id);
 
@@ -50,7 +51,7 @@ export class UserService {
       throw error;
     }
 
-    return updated;
+    return this.userRepository.sanitizeUser(updated);
   }
 
   public deleteUser(id: string): void {
