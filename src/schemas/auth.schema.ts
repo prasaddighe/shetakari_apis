@@ -13,7 +13,7 @@ export const registerSchema = {
       email: { type: 'string' },
       password: { type: 'string' },
       profileImage: { type: 'string' },
-      role: { type: 'string', enum: ['admin', 'user', 'farmer'], default: 'farmer' },
+      role: { type: 'string', enum: ['admin', 'farmer'], default: 'farmer' },
     },
     additionalProperties: false,
   },
