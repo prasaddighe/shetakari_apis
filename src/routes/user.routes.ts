@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { UserRepository } from '../repositories/user.repository.js';
 import { UserService } from '../services/user.service.js';
 import { UserController } from '../controllers/user.controller.js';
+import { authenticate, authorizeRoles } from '../middlewares/auth.middleware.js';
 import {
   getUsersSchema,
   getUserParamsSchema,
@@ -21,7 +22,15 @@ export async function userRoutes(
   // Register endpoints
   fastify.get('/', { schema: getUsersSchema }, userController.getUsersHandler);
   fastify.get('/:id', { schema: getUserParamsSchema }, userController.getUserByIdHandler);
-  fastify.post('/', { schema: createUserSchema }, userController.createUserHandler);
+  fastify.post(
+    '/',
+    {
+      schema: createUserSchema,
+      preHandler: [authorizeRoles('superadmin', 'admin')],
+    },
+    userController.createUserHandler as any
+  );
   fastify.put('/:id', { schema: updateUserSchema }, userController.updateUserHandler);
   fastify.delete('/:id', userController.deleteUserHandler);
 }
+

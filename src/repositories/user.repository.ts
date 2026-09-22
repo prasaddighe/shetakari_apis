@@ -12,6 +12,20 @@ export class UserRepository {
   private seedInitialData(): void {
     const defaultUsers: (CreateUserDTO & { password?: string })[] = [
       {
+        name: 'Super Admin',
+        mobileNumber: '9000000001',
+        email: 'superadmin@example.com',
+        role: 'superadmin',
+        password: 'Password123'
+      },
+      {
+        name: 'System Admin',
+        mobileNumber: '9000000002',
+        email: 'admin@example.com',
+        role: 'admin',
+        password: 'Password123'
+      },
+      {
         name: 'Rahul Sharma',
         mobileNumber: '9876543210',
         village: 'Khed',

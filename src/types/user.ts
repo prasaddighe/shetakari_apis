@@ -1,4 +1,15 @@
-export type UserRole = 'admin' | 'farmer';
+export type UserRole = 'superadmin' | 'admin' | 'farmer';
+
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    user: {
+      id: string;
+      name: string;
+      mobileNumber?: string;
+      role: UserRole;
+    };
+  }
+}
 
 export interface User {
   id: string;
